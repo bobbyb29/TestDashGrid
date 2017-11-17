@@ -1,22 +1,28 @@
 package org.pgot.testdashgrid;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
-import android.widget.GridLayout;
-import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import static android.graphics.Color.BLACK;
-import static android.graphics.Color.WHITE;
-
 
 public class MainActivity extends AppCompatActivity {
     private Bitmap bitmap;
+    String companies[] = {"Google","Windows","iPhone","Nokia","Samsung",
+            "Google","Windows","iPhone","Nokia","Samsung",
+            "Google","Windows","iPhone","Nokia","Samsung"};
+    String os[]       =  {"Android","Mango","iOS","Symbian","Bada",
+            "Android","Mango","iOS","Symbian","Bada",
+            "Android","Mango","iOS","Symbian","Bada"};
+
+    TableLayout tl;
+    TableRow tr;
+    TextView companyTV,valueTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,71 +31,106 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        TableLayout stk = (TableLayout) findViewById(R.id.myTable);
-        GridLayout gridLayout = null;
-        TableRow tbrow0 = null;
-        TableRow tbrowx = null;
-        TableRow tbrowy = null;
-        for (int l = 0; l <= 5; l++) {
-
-            tbrow0 = new TableRow(this);
-            TextView tv0r0 = new TextView(this);
-            tv0r0.setText("Bally ");
-            tv0r0.setBackgroundColor(WHITE);
-            tv0r0.setTextColor(BLACK);
-            tbrow0.addView(tv0r0);
-
-            gridLayout = new GridLayout(this);
-            int total = 8;
-            int column = 1;
-            int row = total / column;
-            gridLayout.setAlignmentMode(GridLayout.ALIGN_BOUNDS);
-            gridLayout.setColumnCount(column);
-            gridLayout.setRowCount(row + 1);
-
-            for (int i = 0, c = 0, r = 0; i < total; i++, c++) {
-                if (c == column) {
-                    c = 0;
-                    r++;
-                }
-
-                ImageView iv0r1 = new ImageView(this);
-                iv0r1.setImageResource(R.mipmap.ic_49ers);
-                GridLayout.LayoutParams param = new GridLayout.LayoutParams();
-                param.height = TableLayout.LayoutParams.WRAP_CONTENT;
-                param.width = TableLayout.LayoutParams.WRAP_CONTENT;
-                param.rightMargin = 5;
-                param.topMargin = 5;
-                param.setGravity(Gravity.CENTER);
-                param.columnSpec = GridLayout.spec(c);
-                param.rowSpec = GridLayout.spec(r);
-                gridLayout.addView(iv0r1);
-            }
-
-            tbrow0.setBackgroundResource(R.color.colorPrimaryDark);
-
-            //Row x is the row of cells containing the win-loss records for eeach userid
-            tbrowx = new TableRow(this);
-            TextView tv0rx = new TextView(this);
-            tv0rx.setText("10-0 ");
-            tbrowx.addView(tv0rx);
-
-            //Row y is the row of cells the tie-break for eeach userid if they so choose
-            tbrowy = new TableRow(this);
-            TextView tv0ry = new TextView(this);
-            tv0ry.setText("56 ");
-            tbrowy.addView(tv0ry);
+        tl = (TableLayout) findViewById(R.id.myTable);
+        addHeaders();
+        addData();
+    }
 
 
-        // this section runs only once outside the for loop
-        stk.addView(tbrow0);
-        stk.addView(gridLayout);
-        stk.addView(tbrowx);
-        stk.addView(tbrowy);
+    /** This function add the headers to the table **/
+    private void addHeaders() {
+        /** Create a TableRow dynamically **/
+        tr = new TableRow(this);
+        tr.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
 
+        /** Creating a TextView to add to the row **/
+        TextView companyTV = new TextView(this);
+        companyTV.setText("Companies");
+        companyTV.setTextColor(Color.GRAY);
+        companyTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        companyTV.setPadding(5, 5, 5, 0);
+        tr.addView(companyTV);  // Adding textView to tablerow.
+
+        /** Creating another textview **/
+        TextView valueTV = new TextView(this);
+        valueTV.setText("Operating Systems");
+        valueTV.setTextColor(Color.GRAY);
+        valueTV.setPadding(5, 5, 5, 0);
+        valueTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        tr.addView(valueTV); // Adding textView to tablerow.
+
+        // Add the TableRow to the TableLayout
+        tl.addView(tr, new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+
+        // we are adding two textviews for the divider because we have two columns
+        tr = new TableRow(this);
+        tr.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+
+        /** Creating another textview **/
+        TextView divider = new TextView(this);
+        divider.setText("-----------------");
+        divider.setTextColor(Color.GREEN);
+        divider.setPadding(5, 0, 0, 0);
+        divider.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        tr.addView(divider); // Adding textView to tablerow.
+
+        TextView divider2 = new TextView(this);
+        divider2.setText("-------------------------");
+        divider2.setTextColor(Color.GREEN);
+        divider2.setPadding(5, 0, 0, 0);
+        divider2.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        tr.addView(divider2); // Adding textView to tablerow.
+
+        // Add the TableRow to the TableLayout
+        tl.addView(tr, new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+    }
+
+    /** This function add the data to the table **/
+    public void addData(){
+
+        for (int i = 0; i < companies.length; i++)
+        {
+            /** Create a TableRow dynamically **/
+            tr = new TableRow(this);
+            tr.setLayoutParams(new TableLayout.LayoutParams(
+                    TableLayout.LayoutParams.FILL_PARENT,
+                    TableLayout.LayoutParams.WRAP_CONTENT));
+
+            /** Creating a TextView to add to the row **/
+            companyTV = new TextView(this);
+            companyTV.setText(companies[i]);
+            companyTV.setTextColor(Color.RED);
+            companyTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            companyTV.setPadding(5, 5, 5, 5);
+            tr.addView(companyTV);  // Adding textView to tablerow.
+
+            /** Creating another textview **/
+            valueTV = new TextView(this);
+            valueTV.setText(os[i]);
+            valueTV.setTextColor(Color.GREEN);
+            valueTV.setPadding(5, 5, 5, 5);
+            valueTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            tr.addView(valueTV); // Adding textView to tablerow.
+
+            // Add the TableRow to the TableLayout
+            tl.addView(tr, new TableLayout.LayoutParams(
+                    TableLayout.LayoutParams.FILL_PARENT,
+                    TableLayout.LayoutParams.WRAP_CONTENT));
         }
 
+
+
     }
+
+
 
 
 }
