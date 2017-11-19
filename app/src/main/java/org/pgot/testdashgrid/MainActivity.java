@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -13,12 +15,24 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     private Bitmap bitmap;
-    String companies[] = {"Google","Windows","iPhone","Nokia","Samsung",
+
+    String players[] = {"Google","Windows","iPhone","Nokia","Samsung",
             "Google","Windows","iPhone","Nokia","Samsung",
-            "Google","Windows","iPhone","Nokia","Samsung"};
-    String os[]       =  {"Android","Mango","iOS","Symbian","Bada",
-            "Android","Mango","iOS","Symbian","Bada",
-            "Android","Mango","iOS","Symbian","Bada"};
+            "Google","Windows","iPhone"};
+
+    String teams[]   = {"SEA","PHI","NYG","MIN",
+            "DET","WAS","DAL","PIT","IND",
+            "TEN","CHI","ATL","CLE","LAR"};
+
+    //calculated and concatenated
+    String footers[] = {"10-0","10-0","10-0","10-0","10-0",
+            "10-0","10-0","10-0","10-0","10-0",
+            "10-0","10-0","10-0"};
+
+    //pulled from the database
+    String tiebreaker[] = {"99","99","99","99","99",
+            "99","99","99","","99",
+            "99","99","99"};
 
     TableLayout tl;
     TableRow tr;
@@ -30,12 +44,63 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         tl = (TableLayout) findViewById(R.id.myTable);
         addHeaders();
         addData();
+        addFooter();
+        addTieBreaker();
     }
 
+    private void addTieBreaker() {
+        /** Create a TableRow dynamically **/
+        tr = new TableRow(this);
+        tr.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
 
+        for(int p=0;  p < players.length; p++) {
+            /** Creating a TextView to add the footers row **/
+            TextView footerTV = new TextView(this);
+            footerTV.setText(tiebreaker[p]);
+            footerTV.setTextColor(Color.GRAY);
+            footerTV.setGravity(View.TEXT_ALIGNMENT_GRAVITY);
+            footerTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            footerTV.setPadding(5, 5, 5, 0);
+            tr.addView(footerTV);  // Adding textView to tablerow.
+        }
+
+        // Add the TableRow to the TableLayout
+        tl.addView(tr, new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+
+    }
+
+    private void addFooter() {
+        /** Create a TableRow dynamically **/
+        tr = new TableRow(this);
+        tr.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+
+        for(int p=0;  p < players.length; p++) {
+            /** Creating a TextView to add the footers row **/
+            TextView footerTV = new TextView(this);
+            footerTV.setText(footers[p]);
+            footerTV.setTextColor(Color.GRAY);
+            footerTV.setGravity(View.TEXT_ALIGNMENT_GRAVITY);
+            footerTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            footerTV.setPadding(5, 5, 5, 0);
+            tr.addView(footerTV);  // Adding textView to tablerow.
+        }
+
+        // Add the TableRow to the TableLayout
+        tl.addView(tr, new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
+
+    }
 
     /** This function add the headers to the table **/
     private void addHeaders() {
@@ -45,37 +110,16 @@ public class MainActivity extends AppCompatActivity {
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
-        /** Creating a TextView to add to the row **/
-        TextView companyTV = new TextView(this);
-        companyTV.setText("Keeno");
-        companyTV.setTextColor(Color.GRAY);
-        companyTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        companyTV.setPadding(5, 5, 5, 0);
-        tr.addView(companyTV);  // Adding textView to tablerow.
 
-        /** Creating another textview **/
-        TextView valueTV = new TextView(this);
-        valueTV.setText("Vash");
-        valueTV.setTextColor(Color.GRAY);
-        valueTV.setPadding(5, 5, 5, 0);
-        valueTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        tr.addView(valueTV); // Adding textView to tablerow.
-
-        /** Creating another textview **/
-        TextView valueTV1 = new TextView(this);
-        valueTV1.setText("Bally");
-        valueTV1.setTextColor(Color.GRAY);
-        valueTV1.setPadding(5, 5, 5, 0);
-        valueTV1.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        tr.addView(valueTV1); // Adding textView to tablerow.
-
-        /** Creating another textview **/
-        TextView valueTV2 = new TextView(this);
-        valueTV2.setText("Tomlin");
-        valueTV2.setTextColor(Color.GRAY);
-        valueTV2.setPadding(5, 5, 5, 0);
-        valueTV2.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        tr.addView(valueTV2); // Adding textView to tablerow.
+        for(int p=0;  p < players.length; p++) {
+            /** Creating a TextView to add to the row **/
+            TextView playerTV = new TextView(this);
+            playerTV.setText(players[p]);
+            playerTV.setTextColor(Color.GRAY);
+            playerTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            playerTV.setPadding(5, 5, 5, 0);
+            tr.addView(playerTV);  // Adding textView to tablerow.
+        }
 
         // Add the TableRow to the TableLayout
         tl.addView(tr, new TableLayout.LayoutParams(
@@ -86,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
     /** This function add the data to the table **/
     public void addData(){
 
-        for (int i = 0; i < companies.length; i++)
+        for (int i=0; i < teams.length; i++)
         {
             /** Create a TableRow dynamically **/
             tr = new TableRow(this);
@@ -94,49 +138,70 @@ public class MainActivity extends AppCompatActivity {
                     TableLayout.LayoutParams.FILL_PARENT,
                     TableLayout.LayoutParams.WRAP_CONTENT));
 
-            /** Creating a TextView to add to the row **/
-            TextView companyTV = new TextView(this);
-            companyTV.setText(companies[i]);
-            companyTV.setTextColor(Color.RED);
-            companyTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            companyTV.setPadding(5, 5, 5, 5);
-            tr.addView(companyTV);  // Adding textView to tablerow.
 
-            /** Creating a TextView to add to the row **/
-            TextView companyTV1 = new TextView(this);
-            companyTV1.setText(companies[i]);
-            companyTV1.setTextColor(Color.RED);
-            companyTV1.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            companyTV1.setPadding(5, 5, 5, 5);
-            tr.addView(companyTV1);  // Adding textView to tablerow.
+            for(int t=0;  t < players.length; t++) {
+                /** Creating a team icon image to add to the row **/
+                ImageView teamIcon = new ImageView(this);
 
-            /** Creating a TextView to add to the row **/
-            TextView companyTV2 = new TextView(this);
-            companyTV2.setText(companies[i]);
-            companyTV2.setTextColor(Color.RED);
-            companyTV2.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            companyTV2.setPadding(5, 5, 5, 5);
-            tr.addView(companyTV2);  // Adding textView to tablerow.
+                switch (teams[i]) {
+                    case "SEA":
+                        teamIcon.setImageResource(R.mipmap.ic_seahawks);
+                        break;
+                    case "PHI":
+                        teamIcon.setImageResource(R.mipmap.ic_eagles);
+                        break;
+                    case "NYG":
+                        teamIcon.setImageResource(R.mipmap.ic_giants);
+                        break;
+                    case "DAL":
+                        teamIcon.setImageResource(R.mipmap.ic_cowboys);
+                        break;
+                    case "CHI":
+                        teamIcon.setImageResource(R.mipmap.ic_bears);
+                        break;
+                    case "PIT":
+                        teamIcon.setImageResource(R.mipmap.ic_steelers);
+                        break;
+                    case "CLE":
+                        teamIcon.setImageResource(R.mipmap.ic_browns);
+                        break;
+                    case "LAR":
+                        teamIcon.setImageResource(R.mipmap.ic_rams);
+                        break;
+                    case "ATL":
+                        teamIcon.setImageResource(R.mipmap.ic_falcons);
+                        break;
+                    case "IND":
+                        teamIcon.setImageResource(R.mipmap.ic_colts);
+                        break;
+                    case "TEN":
+                        teamIcon.setImageResource(R.mipmap.ic_titans);
+                        break;
+                    case "MIN":
+                        teamIcon.setImageResource(R.mipmap.ic_vikings);
+                        break;
+                    case "DET":
+                        teamIcon.setImageResource(R.mipmap.ic_lions);
+                        break;
+                    case "WAS":
+                        teamIcon.setImageResource(R.mipmap.ic_redskins);
+                        break;
+                    default:
+                        teamIcon.setImageResource(R.mipmap.ic_launcher);
+                        break;
+                }
 
-            /** Creating a TextView to add to the row **/
-            TextView companyTV3 = new TextView(this);
-            companyTV3.setText(companies[i]);
-            companyTV3.setTextColor(Color.RED);
-            companyTV3.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            companyTV3.setPadding(5, 5, 5, 5);
-            tr.addView(companyTV3);  // Adding textView to tablerow.
+                // set this for shared preferences
+                teamIcon.setBackgroundColor(Color.YELLOW);
+
+                teamIcon.setPadding(5, 5, 5, 5);
+                tr.addView(teamIcon);  // Adding textView to tablerow.
+            }
 
             // Add the TableRow to the TableLayout
             tl.addView(tr, new TableLayout.LayoutParams(
                     TableLayout.LayoutParams.FILL_PARENT,
                     TableLayout.LayoutParams.WRAP_CONTENT));
         }
-
-
-
     }
-
-
-
-
 }
