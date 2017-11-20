@@ -3,6 +3,7 @@ package org.pgot.testdashgrid;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -12,30 +13,48 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
+
     private Bitmap bitmap;
 
-    String players[] = {"Google","Windows","iPhone","Nokia","Samsung",
-            "Google","Windows","iPhone","Nokia","Samsung",
-            "Google","Windows","iPhone"};
+    String players[] = {"Google", "Windows", "iPhone", "Nokia", "Samsung",
+            "Google", "Windows", "iPhone", "Nokia", "Samsung",
+            "Google", "Windows", "iPhone"};
 
-    String teams[]   = {"SEA","PHI","NYG","MIN",
-            "DET","WAS","DAL","PIT","IND",
-            "TEN","CHI","ATL","CLE","LAR"};
+    List<String> uid = new ArrayList<String>();
+    List<String> tno = new ArrayList<String>();
+
+    String teams[] = {"SEA", "PHI", "NYG", "MIN",
+            "DET", "WAS", "DAL", "PIT", "IND",
+            "TEN", "CHI", "ATL", "CLE", "LAR"};
 
     //calculated and concatenated
-    String footers[] = {"10-0","10-0","10-0","10-0","10-0",
-            "10-0","10-0","10-0","10-0","10-0",
-            "10-0","10-0","10-0"};
+    String footers[] = {"10-0", "10-0", "10-0", "10-0", "10-0",
+            "10-0", "10-0", "10-0", "10-0", "10-0",
+            "10-0", "10-0", "10-0"};
 
     //pulled from the database
-    String tiebreaker[] = {"99","99","99","99","99",
-            "99","99","99","","99",
-            "99","99","99"};
+    String tiebreaker[] = {"99", "99", "99", "99", "99",
+            "99", "99", "99", "", "99",
+            "99", "99", "99"};
 
     TableLayout tl;
     TableRow tr;
+
+    ArrayList picklist =
+            new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,11 +65,89 @@ public class MainActivity extends AppCompatActivity {
 
 
         tl = (TableLayout) findViewById(R.id.myTable);
+        // take the array to the database
+        new JSONParse().execute();
         addHeaders();
         addData();
         addFooter();
         addTieBreaker();
     }
+
+    class JSONParse extends AsyncTask<Void, Void, Void> {
+
+        private String URL = "http://www.bab-c.com:88/picksandbets/football/test.php";
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            HttpHandler sh = new HttpHandler();
+            // Making a request to url and getting response
+            String jsonStr = sh.makeServiceCall(URL);
+            System.out.println("jsonstring output: " + jsonStr);
+
+            // Parse
+            JSONObject json = null;
+            try {
+                json = new JSONObject(jsonStr);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JSONArray jArray = null;
+            try {
+                jArray = json.getJSONArray("userids");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            for (int i = 0; i < jArray.length(); i++) {
+                HashMap<String, String> map = new HashMap<String, String>();
+                JSONObject e = null;
+                try {
+                    e = jArray.getJSONObject(i);
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+                JSONObject jObject = null;
+                try {
+                    jObject = new JSONObject(String.valueOf(e));
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+
+                try {
+                    map.put("username", jObject.getString("username"));
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+                try {
+                    map.put("teamno", jObject.getString("teamno"));
+                } catch (JSONException e1) {
+                    e1.printStackTrace();
+                }
+                picklist.add(map);
+            }
+
+            // convert picklist to multiple collection arrays
+            Multimap<String, String> myMultimap = ArrayListMultimap.create();
+            // Adding the picklist key/value
+            JSONArray arr = new JSONArray(picklist);
+
+            for(int i = 0; i < arr.length(); i++){
+                try {
+                    uid.add(arr.getJSONObject(i).getString("username"));
+                    tno.add(arr.getJSONObject(i).getString("teamno"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("userids: " + uid + uid.size());
+            System.out.println("teamno: " + tno + tno.size());
+
+            System.out.println("picklist: " + picklist);
+            return null;
+        }
+    }
+
 
     private void addTieBreaker() {
         /** Create a TableRow dynamically **/
