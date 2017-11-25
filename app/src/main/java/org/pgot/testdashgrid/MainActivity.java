@@ -1,10 +1,13 @@
 package org.pgot.testdashgrid;
 
+import android.annotation.TargetApi;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -13,16 +16,18 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -41,20 +46,16 @@ public class MainActivity extends AppCompatActivity {
             "TEN", "CHI", "ATL", "CLE", "LAR"};
 
     //calculated and concatenated
-    String footers[] = {"10-0", "10-0", "10-0", "10-0", "10-0",
-            "10-0", "10-0", "10-0", "10-0", "10-0",
-            "10-0", "10-0", "10-0"};
+    String footers[] = {"10-0", "10-0"};
 
     //pulled from the database
-    String tiebreaker[] = {"99", "99", "99", "99", "99",
-            "99", "99", "99", "", "99",
-            "99", "99", "99"};
+    String tiebreaker[] = {"99", "99"};
 
     TableLayout tl;
     TableRow tr;
 
-    ArrayList picklist =
-            new ArrayList<>();
+    ArrayList picklist = new ArrayList<>();
+    private int k;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,22 +64,23 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         tl = (TableLayout) findViewById(R.id.myTable);
+
         // take the array to the database
         new JSONParse().execute();
-        addHeaders();
-        addData();
-        addFooter();
-        addTieBreaker();
+        //addHeaders();
+        //addData();
+        //addFooter();
+        //addTieBreaker();
     }
 
-    class JSONParse extends AsyncTask<Void, Void, Void> {
+    class JSONParse extends AsyncTask<Void, Void, ArrayList> {
 
         private String URL = "http://www.bab-c.com:88/picksandbets/football/test.php";
 
+
         @Override
-        protected Void doInBackground(Void... params) {
+        protected ArrayList doInBackground(Void... params) {
             HttpHandler sh = new HttpHandler();
             // Making a request to url and getting response
             String jsonStr = sh.makeServiceCall(URL);
@@ -119,33 +121,52 @@ public class MainActivity extends AppCompatActivity {
                     e1.printStackTrace();
                 }
                 try {
-                    map.put("teamno", jObject.getString("teamno"));
+                    map.put("teamini", jObject.getString("teamini"));
                 } catch (JSONException e1) {
                     e1.printStackTrace();
                 }
                 picklist.add(map);
             }
 
-            // convert picklist to multiple collection arrays
-            Multimap<String, String> myMultimap = ArrayListMultimap.create();
-            // Adding the picklist key/value
+            return picklist;
+        }
+
+        @TargetApi(Build.VERSION_CODES.N)
+        @RequiresApi(api = Build.VERSION_CODES.N)
+        @Override
+        protected void onPostExecute(ArrayList arrayList) {
+            super.onPostExecute(arrayList);
+
+            //CONVERT THE JSON OBJECT TO ARRAY
             JSONArray arr = new JSONArray(picklist);
 
-            for(int i = 0; i < arr.length(); i++){
+            for (int i = 0; i < arr.length(); i++) {
                 try {
                     uid.add(arr.getJSONObject(i).getString("username"));
-                    tno.add(arr.getJSONObject(i).getString("teamno"));
+                    tno.add(arr.getJSONObject(i).getString("teamini"));
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
+            Set<Object> uniqueSetU = uid.stream().collect(Collectors.toSet());
+            System.out.println(uniqueSetU);
 
-            System.out.println("userids: " + uid + uid.size());
-            System.out.println("teamno: " + tno + tno.size());
 
-            System.out.println("picklist: " + picklist);
-            return null;
+            //Set<String> uniqueSetU = new HashSet<String>(uid);
+           // for (String temp : uniqueSetU) {
+           //     System.out.println(temp + ":" + Collections.frequency(uid, temp));
+           // }
+            //Count team no with frequency
+            Set<String> uniqueSetT = new HashSet<String>(tno);
+            for (String temp1 : uniqueSetT) {
+                System.out.println(temp1 + ":" + Collections.frequency(tno, temp1));
+            }
+            addHeaders(uniqueSetU);
+            System.out.println("userids:" + uid + uid.size());
+            System.out.println("teamini:" + tno + tno.size());
+            System.out.println("unique set U" + uniqueSetU);
         }
+
     }
 
 
@@ -156,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
-        for(int p=0;  p < players.length; p++) {
+        for (int p = 0; p < tiebreaker.length; p++) {
             /** Creating a TextView to add the footers row **/
             TextView footerTV = new TextView(this);
             footerTV.setText(tiebreaker[p]);
@@ -181,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
-        for(int p=0;  p < players.length; p++) {
+        for (int p = 0; p < players.length; p++) {
             /** Creating a TextView to add the footers row **/
             TextView footerTV = new TextView(this);
             footerTV.setText(footers[p]);
@@ -199,19 +220,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /** This function add the headers to the table **/
-    private void addHeaders() {
+    // This function add the headers to the table
+
+    private void addHeaders(Set<Object> uniqueSetU) {
+
         /** Create a TableRow dynamically **/
         tr = new TableRow(this);
         tr.setLayoutParams(new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
 
+        for (Iterator<Object> it = uniqueSetU.iterator(); it.hasNext(); ) {
+            Object f = it.next();
 
-        for(int p=0;  p < players.length; p++) {
             /** Creating a TextView to add to the row **/
             TextView playerTV = new TextView(this);
-            playerTV.setText(players[p]);
+            playerTV.setText((CharSequence) f);
             playerTV.setTextColor(Color.GRAY);
             playerTV.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
             playerTV.setPadding(5, 5, 5, 0);
@@ -222,25 +246,29 @@ public class MainActivity extends AppCompatActivity {
         tl.addView(tr, new TableLayout.LayoutParams(
                 TableLayout.LayoutParams.FILL_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT));
+        for (int x = 0; x < 3; x++) {
+        addData(x); }
+
     }
 
-    /** This function add the data to the table **/
-    public void addData(){
+    /**
+     * This function add the data to the table
+     *
+     *  */
+    public void addData(int t) {
 
-        for (int i=0; i < teams.length; i++)
-        {
-            /** Create a TableRow dynamically **/
-            tr = new TableRow(this);
-            tr.setLayoutParams(new TableLayout.LayoutParams(
-                    TableLayout.LayoutParams.FILL_PARENT,
-                    TableLayout.LayoutParams.WRAP_CONTENT));
+        /** Create a TableRow dynamically **/
+        tr = new TableRow(this);
+        tr.setLayoutParams(new TableLayout.LayoutParams(
+                TableLayout.LayoutParams.FILL_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT));
 
-
-            for(int t=0;  t < players.length; t++) {
+            // this is for the number of colunms
+            for (; t < 6; t = t + 3) {
                 /** Creating a team icon image to add to the row **/
                 ImageView teamIcon = new ImageView(this);
 
-                switch (teams[i]) {
+                switch (tno.get(t)) {
                     case "SEA":
                         teamIcon.setImageResource(R.mipmap.ic_seahawks);
                         break;
@@ -283,6 +311,9 @@ public class MainActivity extends AppCompatActivity {
                     case "WAS":
                         teamIcon.setImageResource(R.mipmap.ic_redskins);
                         break;
+                    case "CIN":
+                        teamIcon.setImageResource(R.mipmap.ic_bengals);
+                        break;
                     default:
                         teamIcon.setImageResource(R.mipmap.ic_launcher);
                         break;
@@ -290,15 +321,14 @@ public class MainActivity extends AppCompatActivity {
 
                 // set this for shared preferences
                 teamIcon.setBackgroundColor(Color.YELLOW);
-
                 teamIcon.setPadding(5, 5, 5, 5);
-                tr.addView(teamIcon);  // Adding textView to tablerow.
+                tr.addView(teamIcon);  // Adding textView to tablerow.}
             }
-
             // Add the TableRow to the TableLayout
             tl.addView(tr, new TableLayout.LayoutParams(
                     TableLayout.LayoutParams.FILL_PARENT,
                     TableLayout.LayoutParams.WRAP_CONTENT));
-        }
+
     }
 }
+
